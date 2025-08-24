@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Equipos Tecnológicos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+            --light-color: #f8f9fc;
+            --dark-color: #5a5c69;
+            --background-color: #f8f9fc;
+            --text-color: #333;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modo oscuro */
+        [data-theme="dark"] {
+            --background-color: #1a202c;
+            --text-color: #e2e8f0;
+            --light-color: #2d3748;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--info-color) 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></svg>');
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+
+        header h1, header p {
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-container {
+            background-color: var(--light-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            max-width: 500px;
+            margin: 0 auto 25px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+
+        [data-theme="dark"] label {
+            color: #e2e8f0;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            background-color: white;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        [data-theme="dark"] input[type="text"],
+        [data-theme="dark"] input[type="password"],
+        [data-theme="dark"] input[type="file"],
+        [data-theme="dark"] select {
+            background-color: #4a5568;
+            border-color: #4a5568;
+            color: white;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.2);
+            outline: none;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background-color: #2e59d9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #717384;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #17a673;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #d52a1a;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .dashboard {
+            background-color: var(--light-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 25px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .user-info {
+            background-color: var(--light-color);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background-color: var(--light-color);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        [data-theme="dark"] .data-table th,
+        [data-theme="dark"] .data-table td {
+            border-color: #4a5568;
+        }
+
+        .data-table th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .data-table th:hover {
+            background-color: #3a5bc9;
+        }
+
+        .data-table th i {
+            margin-left: 8px;
+            font-size: 12px;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        [data-theme="dark"] .data-table tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(78, 115, 223, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+
+        .admin-controls {
+            background-color: rgba(246, 194, 62, 0.2);
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .notification {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.info {
+            background-color: var(--info-color);
+        }
+
+        .notification.warning {
+            background-color: var(--warning-color);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background-color: transparent;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            cursor: pointer;
+            margin-bottom: -1px;
+            border: 1px solid transparent;
+            border-bottom: none;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            background-color: rgba(78, 115, 223, 0.1);
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        [data-theme="dark"] .tab.active {
+            background-color: #2d3748;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        [data-theme="dark"] .table-container {
+            border-color: #4a5568;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: var(--light-color);
+            border-radius: 5px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .stats-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            flex: 1;
+            min-width: 200px;
+            background: var(--light-color);
+            padding: 25px;
+            border-radius: 5px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-top: 4px solid var(--primary-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card:nth-child(2) {
+            border-top-color: var(--success-color);
+        }
+
+        .stat-card:nth-child(3) {
+            border-top-color: var(--info-color);
+        }
+
+        .stat-card:nth-child(4) {
+            border-top-color: var(--warning-color);
+        }
+
+        .stat-card h3 {
+            margin-bottom: 15px;
+            color: var(--dark-color);
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        [data-theme="dark"] .stat-card h3 {
+            color: #e2e8f0;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-card:nth-child(2) .value {
+            color: var(--success-color);
+        }
+
+        .stat-card:nth-child(3) .value {
+            color: var(--info-color);
+        }
+
+        .stat-card:nth-child(4) .value {
+            color: var(--warning-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            margin: 0;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            border: 1px solid #ddd;
+        }
+
+        [data-theme="dark"] .pagination button {
+            background-color: #4a5568;
+            color: white;
+            border-color: #4a5568;
+        }
+
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination button:hover:not(.active) {
+            background-color: rgba(78, 115, 223, 0.1);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--card-shadow);
+            z-index: 1000;
+            font-size: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--light-color);
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark-color);
+            padding: 0;
+            margin: 0;
+        }
+
+        [data-theme="dark"] .modal-close {
+            color: #e2e8f0;
+        }
+
+        .modal-close:hover {
+            color: var(--danger-color);
+            transform: none;
+            background: none;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-info div {
+                margin-bottom: 15px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .stats-cards {
+                flex-direction: column;
+            }
+
+            .theme-toggle {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+            }
+        }
+
+        /* Mejoras de accesibilidad */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Indicador de foco */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Animación para filas de tabla */
+        @keyframes highlight {
+            0% { background-color: rgba(78, 115, 223, 0.3); }
+            100% { background-color: transparent; }
+        }
+
+        .highlight {
+            animation: highlight 1.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-laptop"></i> Sistema de Gestión de Equipos Tecnológicos</h1>
+            <p>Control y administración de equipos portátiles e tecnológicos</p>
+        </header>
+        
+        <!-- Sección de autenticación -->
+        <div id="auth-section" class="auth-container">
+            <h2><i class="fas fa-sign-in-alt"></i> Iniciar Sesión</h2>
+            <div class="form-group">
+                <label for="username">Usuario:</label>
+                <input type="text" id="username" placeholder="Ingresa tu usuario" aria-label="Nombre de usuario">
+            </div>
+            <div class="form-group">
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" placeholder="Ingresa tu contraseña" aria-label="Contraseña">
+            </div>
+            <button id="login-btn"><i class="fas fa-key"></i> Iniciar Sesión</button>
+            <button id="guest-btn" class="btn-secondary"><i class="fas fa-user"></i> Entrar como Invitado</button>
+            
+            <div id="login-error" class="notification error hidden">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Credenciales incorrectas. Intenta con admin/admin para acceso administrativo.</span>
+            </div>
+        </div>
+        
+        <!-- Panel principal (oculto inicialmente) -->
+        <div id="dashboard" class="dashboard hidden">
+            <div class="user-info">
+                <div>
+                    <h3><i class="fas fa-user-circle"></i> Bienvenido, <span id="user-name">Usuario</span></h3>
+                    <p id="user-role"><i class="fas fa-id-badge"></i> Rol: Invitado</p>
+                </div>
+                <button id="logout-btn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </div>
+            
+            <!-- Controles de administrador (solo visibles para admin) -->
+            <div id="admin-controls" class="admin-controls hidden">
+                <h3><i class="fas fa-tools"></i> Controles de Administrador</h3>
+                <p>Solo los administradores pueden ver y utilizar estos controles.</p>
+                <div class="form-group">
+                    <label>Gestión de Datos:</label>
+                    <button id="clear-data-btn" class="btn-danger"><i class="fas fa-trash-alt"></i> Eliminar todos los datos</button>
+                    <button id="export-data-btn" class="btn-success"><i class="fas fa-file-export"></i> Exportar datos</button>
+                    <button id="add-equipment-btn" class="btn-success"><i class="fas fa-plus"></i> Añadir Equipo</button>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="upload" aria-selected="true" role="tab" tabindex="0">
+                    <i class="fas fa-upload"></i> Cargar Datos
+                </div>
+                <div class="tab" data-tab="view" aria-selected="false" role="tab" tabindex="0">
+                    <i class="fas fa-table"></i> Ver Equipos
+                </div>
+                <div class="tab" data-tab="stats" aria-selected="false" role="tab" tabindex="0">
+                    <i class="fas fa-chart-bar"></i> Estadísticas
+                </div>
+                <div class="tab" data-tab="charts" aria-selected="false" role="tab" tabindex="0">
+                    <i class="fas fa-chart-pie"></i> Gráficas
+                </div>
+                <div class="tab" data-tab="history" aria-selected="false" role="tab" tabindex="0">
+                    <i class="fas fa-history"></i> Historial
+                </div>
+            </div>
+            
+            <!-- Pestaña de carga de datos -->
+            <div id="upload-tab" class="tab-content active" role="tabpanel">
+                <div class="upload-section">
+                    <h3><i class="fas fa-file-upload"></i> Cargar Archivo JSON de Equipos</h3>
+                    <div class="form-group">
+                        <label for="json-file">Selecciona un archivo JSON con datos de equipos:</label>
+                        <input type="file" id="json-file" accept=".json" aria-label="Seleccionar archivo JSON">
+                    </div>
+                    <button id="upload-btn"><i class="fas fa-cloud-upload-alt"></i> Cargar Datos de Equipos</button>
+                </div>
+                
+                <div id="upload-success" class="notification success hidden">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Archivo cargado exitosamente. Equipos agregados al sistema.</span>
+                </div>
+                
+                <div id="upload-error" class="notification error hidden">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Error al cargar el archivo. Asegúrate de que sea un JSON válido con el formato correcto.</span>
+                </div>
+            </div>
+            
+            <!-- Pestaña de visualización de datos -->
+            <div id="view-tab" class="tab-content" role="tabpanel">
+                <h3><i class="fas fa-laptop-medical"></i> Inventario de Equipos</h3>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="filter-type">Filtrar por Tipo:</label>
+                        <select id="filter-type" aria-label="Filtrar por tipo de equipo">
+                            <option value="">Todos los tipos</option>
+                            <option value="Portátil">Portátil</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-sede">Filtrar por Sede:</label>
+                        <select id="filter-sede" aria-label="Filtrar por sede">
+                            <option value="">Todas las sedes</option>
+                            <option value="Principal">Principal</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-docente">Filtrar por Docente:</label>
+                        <input type="text" id="filter-docente" placeholder="Buscar docente..." aria-label="Buscar por docente">
+                    </div>
+                    <div class="filter-group">
+                        <label for="search">Búsqueda general:</label>
+                        <input type="text" id="search" placeholder="Buscar en todos los campos..." aria-label="Búsqueda general">
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" aria-label="Tabla de equipos">
+                        <thead>
+                            <tr>
+                                <th data-sort="id">ID <i class="fas fa-sort"></i></th>
+                                <th data-sort="tipo">Tipo <i class="fas fa-sort"></i></th>
+                                <th data-sort="marca">Marca <i class="fas fa-sort"></i></th>
+                                <th data-sort="procesador">Procesador <i class="fas fa-sort"></i></th>
+                                <th data-sort="serial_ot">Serial OT <i class="fas fa-sort"></i></th>
+                                <th data-sort="fecha_ingreso">Fecha Ingreso <i class="fas fa-sort"></i></th>
+                                <th data-sort="sede">Sede <i class="fas fa-sort"></i></th>
+                                <th data-sort="docente">Docente <i class="fas fa-sort"></i></th>
+                                <th data-sort="observaciones">Observaciones <i class="fas fa-sort"></i></th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body">
+                            <!-- Los datos se insertarán aquí dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination" id="pagination">
+                    <!-- La paginación se insertará aquí dinámicamente -->
+                </div>
+            </div>
+            
+            <!-- Pestaña de estadísticas -->
+            <div id="stats-tab" class="tab-content" role="tabpanel">
+                <h3><i class="fas fa-chart-line"></i> Estadísticas de Equipos</h3>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <h3><i class="fas fa-laptop"></i> Total de Equipos</h3>
+                        <div class="value" id="total-equipos">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-laptop"></i> Equipos Portátiles</h3>
+                        <div class="value" id="total-portatiles">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-building"></i> Equipos por Sede Principal</h3>
+                        <div class="value" id="total-principal">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-sticky-note"></i> Equipos con Observaciones</h3>
+                        <div class="value" id="total-observaciones">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pestaña de gráficas -->
+            <div id="charts-tab" class="tab-content" role="tabpanel">
+                <h3><i class="fas fa-chart-pie"></i> Visualización de Datos de Equipos</h3>
+                
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="chart-type">Tipo de Gráfica:</label>
+                        <select id="chart-type">
+                            <option value="bar">Barras</option>
+                            <option value="pie">Pastel</option>
+                            <option value="doughnut">Dona</option>
+                            <option value="line">Línea</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="chart-data">Datos a Mostrar:</label>
+                        <select id="chart-data">
+                            <option value="tipo">Por Tipo</option>
+                            <option value="sede">Por Sede</option>
+                            <option value="marca">Por Marca</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="equipos-chart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Pestaña de historial -->
+            <div id="history-tab" class="tab-content" role="tabpanel">
+                <h3><i class="fas fa-history"></i> Historial de Cargas</h3>
+                <div class="table-container">
+                    <table class="data-table" aria-label="Tabla de historial">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Archivo</th>
+                                <th>Usuario</th>
+                                <th>Equipos</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body">
+                            <!-- El historial se insertará aquí dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Botón para cambiar tema -->
+    <div class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">
+        <i class="fas fa-moon"></i>
+    </div>
+    
+    <!-- Modal para añadir/editar equipos -->
+    <div id="equipment-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title"><i class="fas fa-laptop"></i> Añadir Equipo</h3>
+                <button class="modal-close" aria-label="Cerrar modal">&times;</button>
+            </div>
+            <form id="equipment-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eq-tipo">Tipo:</label>
+                        <select id="eq-tipo" required>
+                            <option value="">Seleccionar tipo</option>
+                            <option value="Portátil">Portátil</option>
+                            <option value="Tablet">Tablet</option>
+                            <option value="Celular">Celular</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-marca">Marca:</label>
+                        <input type="text" id="eq-marca" placeholder="Marca del equipo" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eq-procesador">Procesador:</label>
+                        <input type="text" id="eq-procesador" placeholder="Procesador del equipo">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-serial">Serial OT:</label>
+                        <input type="text" id="eq-serial" placeholder="Serial OT" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eq-fecha">Fecha Ingreso:</label>
+                        <input type="date" id="eq-fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-sede">Sede:</label>
+                        <select id="eq-sede" required>
+                            <option value="">Seleccionar sede</option>
+                            <option value="Principal">Principal</option>
+                            <option value="Secundaria">Secundaria</option>
+                            <option value="Otra">Otra</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="eq-docente">Docente:</label>
+                        <input type="text" id="eq-docente" placeholder="Nombre del docente">
+                    </div>
+                    <div class="form-group">
+                        <label for="eq-observaciones">Observaciones:</label>
+                        <input type="text" id="eq-observaciones" placeholder="Observaciones">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-success"><i class="fas fa-save"></i> Guardar</button>
+                    <button type="button" class="btn-secondary modal-close"><i class="fas fa-times"></i> Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo para demostración basados en el archivo proporcionado
+        const sampleData = [
+            {
+                "id": 1,
+                "tipo": "Portátil",
+                "marca": "HP",
+                "procesador": "1 Celeron Integrado Multi- Nucleo 1.9 GHz",
+                "serial_ot": "22200974",
+                "fecha_ingreso": "2025-08-08",
+                "sede": "Principal",
+                "docente": "ING. FREDY OSWALDO COCONUBO",
+                "observaciones": "Dar de baja , el equipo se encuentra en la intitucion educativa",
+                "cronograma": null
+            },
+            {
+                "id": 2,
+                "tipo": "Portátil",
+                "marca": "HP",
+                "procesador": "1 Celeron Integrado Multi- Nucleo 1.9 GHz",
+                "serial_ot": "22200975",
+                "fecha_ingreso": "2025-08-08",
+                "sede": "Principal",
+                "docente": "ING. FREDY OSWALDO COCONUBO",
+                "observaciones": "",
+                "cronograma": null
+            },
+            {
+                "id": 3,
+                "tipo": "Portátil",
+                "marca": "HP",
+                "procesador": "1 Celeron Integrado Multi- Nucleo 1.9 GHz",
+                "serial_ot": "22200463",
+                "fecha_ingreso": "2025-08-08",
+                "sede": "Principal",
+                "docente": "ING. FREDY OSWALDO COCONUBO",
+                "observaciones": "",
+                "cronograma": null
+            }
+        ];
+        
+        const sampleHistory = [
+            { date: "2023-05-19 14:30", file: "EQUIPOS COL.json", user: "admin", records: 3 },
+            { date: "2023-05-18 10:15", file: "equipos_nuevos.json", user: "invitado", records: 5 },
+            { date: "2023-05-15 09:45", file: "inventario_tecnologico.json", user: "admin", records: 12 }
+        ];
+        
+        // Elementos del DOM
+        const authSection = document.getElementById('auth-section');
+        const dashboard = document.getElementById('dashboard');
+        const loginBtn = document.getElementById('login-btn');
+        const guestBtn = document.getElementById('guest-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userName = document.getElementById('user-name');
+        const userRole = document.getElementById('user-role');
+        const adminControls = document.getElementById('admin-controls');
+        const uploadBtn = document.getElementById('upload-btn');
+        const jsonFileInput = document.getElementById('json-file');
+        const uploadSuccess = document.getElementById('upload-success');
+        const uploadError = document.getElementById('upload-error');
+        const loginError = document.getElementById('login-error');
+        const dataTableBody = document.getElementById('data-table-body');
+        const historyTableBody = document.getElementById('history-table-body');
+        const clearDataBtn = document.getElementById('clear-data-btn');
+        const exportDataBtn = document.getElementById('export-data-btn');
+        const addEquipmentBtn = document.getElementById('add-equipment-btn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const filterType = document.getElementById('filter-type');
+        const filterSede = document.getElementById('filter-sede');
+        const filterDocente = document.getElementById('filter-docente');
+        const searchInput = document.getElementById('search');
+        const themeToggle = document.getElementById('theme-toggle');
+        const equipmentModal = document.getElementById('equipment-modal');
+        const equipmentForm = document.getElementById('equipment-form');
+        const modalTitle = document.getElementById('modal-title');
+        const modalCloseBtns = document.querySelectorAll('.modal-close');
+        const chartType = document.getElementById('chart-type');
+        const chartDataSelect = document.getElementById('chart-data');
+        const pagination = document.getElementById('pagination');
+        
+        // Elementos de estadísticas
+        const totalEquipos = document.getElementById('total-equipos');
+        const totalPortatiles = document.getElementById('total-portatiles');
+        const totalPrincipal = document.getElementById('total-principal');
+        const totalObservaciones = document.getElementById('total-observaciones');
+        
+        // Estado de la aplicación
+        let currentUser = null;
+        let chart = null;
+        let equiposData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let sortColumn = null;
+        let sortDirection = 'asc';
+        let editingEquipmentId = null;
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar tema guardado
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+            
+            // Cargar datos de ejemplo
+            equiposData = [...sampleData];
+            filteredData = [...equiposData];
+            renderDataTable();
+            renderHistoryTable(sampleHistory);
+            updateStats();
+            initChart();
+            
+            // Configurar event listeners
+            loginBtn.addEventListener('click', handleLogin);
+            guestBtn.addEventListener('click', handleGuestLogin);
+            logoutBtn.addEventListener('click', handleLogout);
+            uploadBtn.addEventListener('click', handleFileUpload);
+            clearDataBtn.addEventListener('click', clearAllData);
+            exportDataBtn.addEventListener('click', exportData);
+            addEquipmentBtn.addEventListener('click', showAddEquipmentModal);
+            themeToggle.addEventListener('click', toggleTheme);
+            equipmentForm.addEventListener('submit', handleEquipmentSubmit);
+            
+            // Configurar modal
+            modalCloseBtns.forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+            
+            // Cerrar modal al hacer clic fuera
+            equipmentModal.addEventListener('click', function(e) {
+                if (e.target === equipmentModal) {
+                    closeModal();
+                }
+            });
+            
+            // Configurar filtros
+            filterType.addEventListener('change', applyFilters);
+            filterSede.addEventListener('change', applyFilters);
+            filterDocente.addEventListener('input', debounce(applyFilters, 300));
+            searchInput.addEventListener('input', debounce(applyFilters, 300));
+            
+            // Configurar pestañas
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    switchTab(tabId);
+                    
+                    // Actualizar gráficas y estadísticas cuando se cambia a esas pestañas
+                    if (tabId === 'charts') {
+                        initChart();
+                    } else if (tabId === 'stats') {
+                        updateStats();
+                    }
+                });
+                
+                // Soporte para navegación con teclado
+                tab.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        tab.click();
+                    }
+                });
+            });
+            
+            // Configurar ordenamiento de tabla
+            const sortableHeaders = document.querySelectorAll('.data-table th[data-sort]');
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-sort');
+                    sortTable(column);
+                });
+            });
+            
+            // Configurar opciones de gráfica
+            chartType.addEventListener('change', updateChart);
+            chartDataSelect.addEventListener('change', updateChart);
+            
+            // Configurar paginación
+            pagination.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' && !e.target.classList.contains('active')) {
+                    currentPage = parseInt(e.target.getAttribute('data-page'));
+                    renderDataTable();
+                }
+            });
+        });
+        
+        // Función de debounce para optimizar búsquedas
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+        
+        // Funciones de autenticación
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (username === 'admin' && password === 'admin') {
+                currentUser = { name: 'Administrador', role: 'admin' };
+                showDashboard();
+                loginError.classList.add('hidden');
+            } else {
+                loginError.classList.remove('hidden');
+                // Agregar clase para animación de error
+                document.getElementById('username').classList.add('highlight');
+                document.getElementById('password').classList.add('highlight');
+                setTimeout(() => {
+                    document.getElementById('username').classList.remove('highlight');
+                    document.getElementById('password').classList.remove('highlight');
+                }, 1500);
+            }
+        }
+        
+        function handleGuestLogin() {
+            currentUser = { name: 'Invitado', role: 'guest' };
+            showDashboard();
+        }
+        
+        function handleLogout() {
+            currentUser = null;
+            showAuthSection();
+        }
+        
+        function showAuthSection() {
+            authSection.classList.remove('hidden');
+            dashboard.classList.add('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        function showDashboard() {
+            authSection.classList.add('hidden');
+            dashboard.classList.remove('hidden');
+            
+            userName.textContent = currentUser.name;
+            userRole.innerHTML = `<i class="fas fa-id-badge"></i> Rol: ${currentUser.role === 'admin' ? 'Administrador' : 'Invitado'}`;
+            
+            // Mostrar u ocultar controles de administrador
+            if (currentUser.role === 'admin') {
+                adminControls.classList.remove('hidden');
+            } else {
+                adminControls.classList.add('hidden');
+            }
+        }
+        
+        // Funciones de gestión de datos
+        function handleFileUpload() {
+            const file = jsonFileInput.files[0];
+            
+            if (!file) {
+                showNotification('Por favor, selecciona un archivo.', 'error');
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            uploadBtn.innerHTML = '<span class="loading"></span> Cargando...';
+            uploadBtn.disabled = true;
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    
+                    // Validar que sea un array
+                    if (!Array.isArray(jsonData)) {
+                        showNotification('El archivo JSON debe contener un array de objetos.', 'error');
+                        return;
+                    }
+                    
+                    // Validar estructura básica
+                    if (jsonData.length > 0 && !jsonData[0].hasOwnProperty('tipo')) {
+                        showNotification('El archivo JSON no tiene el formato esperado para equipos.', 'error');
+                        return;
+                    }
+                    
+                    // Asignar IDs si no existen
+                    const maxId = equiposData.length > 0 ? Math.max(...equiposData.map(eq => eq.id)) : 0;
+                    let newId = maxId;
+                    
+                    const processedData = jsonData.map(item => {
+                        if (!item.id) {
+                            newId++;
+                            return { ...item, id: newId };
+                        }
+                        return item;
+                    });
+                    
+                    // Procesar datos
+                    equiposData = [...equiposData, ...processedData];
+                    applyFilters();
+                    initChart();
+                    updateStats();
+                    
+                    // Añadir al historial
+                    addToHistory(file.name, processedData.length);
+                    
+                    showNotification('Archivo cargado exitosamente. Equipos agregados al sistema.', 'success');
+                } catch (error) {
+                    showNotification('Error al parsear el archivo JSON: ' + error.message, 'error');
+                } finally {
+                    // Restaurar botón
+                    uploadBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Cargar Datos de Equipos';
+                    uploadBtn.disabled = false;
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error al leer el archivo.', 'error');
+                uploadBtn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Cargar Datos de Equipos';
+                uploadBtn.disabled = false;
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        function renderDataTable() {
+            // Calcular paginación
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+            
+            dataTableBody.innerHTML = '';
+            
+            if (paginatedData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="10" style="text-align: center;">No hay equipos registrados</td>`;
+                dataTableBody.appendChild(row);
+                renderPagination(0);
+                return;
+            }
+            
+            paginatedData.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.id || ''}</td>
+                    <td>${item.tipo || ''}</td>
+                    <td>${item.marca || ''}</td>
+                    <td>${item.procesador || ''}</td>
+                    <td>${item.serial_ot || ''}</td>
+                    <td>${item.fecha_ingreso || ''}</td>
+                    <td>${item.sede || ''}</td>
+                    <td>${item.docente || ''}</td>
+                    <td>${item.observaciones || ''}</td>
+                    <td>
+                        ${currentUser?.role === 'admin' ? 
+                            `<div class="tooltip">
+                                <button class="btn-secondary" onclick="editEquipment(${item.id})" aria-label="Editar equipo ${item.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <span class="tooltiptext">Editar equipo</span>
+                            </div>
+                             <div class="tooltip">
+                                <button class="btn-danger" onclick="deleteEquipment(${item.id})" aria-label="Eliminar equipo ${item.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <span class="tooltiptext">Eliminar equipo</span>
+                            </div>` : 
+                            `<div class="tooltip">
+                                <button class="btn-secondary" onclick="viewEquipment(${item.id})" aria-label="Ver detalles del equipo ${item.id}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <span class="tooltiptext">Ver detalles</span>
+                            </div>`
+                        }
+                    </td>
+                `;
+                dataTableBody.appendChild(row);
+            });
+            
+            renderPagination(filteredData.length);
+        }
+        
+        function renderPagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Botón anterior
+            paginationHTML += `<button ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">
+                <i class="fas fa-chevron-left"></i>
+            </button>`;
+            
+            // Páginas
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    paginationHTML += `<button class="${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    paginationHTML += '<span>...</span>';
+                }
+            }
+            
+            // Botón siguiente
+            paginationHTML += `<button ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">
+                <i class="fas fa-chevron-right"></i>
+            </button>`;
+            
+            pagination.innerHTML = paginationHTML;
+        }
+        
+        function sortTable(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = column;
+                sortDirection = 'asc';
+            }
+            
+            filteredData.sort((a, b) => {
+                let valueA = a[column] || '';
+                let valueB = b[column] || '';
+                
+                // Manejar fechas
+                if (column === 'fecha_ingreso') {
+                    valueA = new Date(valueA);
+                    valueB = new Date(valueB);
+                }
+                
+                if (valueA < valueB) {
+                    return sortDirection === 'asc' ? -1 : 1;
+                }
+                if (valueA > valueB) {
+                    return sortDirection === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+            
+            // Actualizar iconos de ordenamiento
+            document.querySelectorAll('.data-table th i').forEach(icon => {
+                icon.className = 'fas fa-sort';
+            });
+            
+            const currentHeader = document.querySelector(`.data-table th[data-sort="${column}"] i`);
+            if (currentHeader) {
+                currentHeader.className = sortDirection === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down';
+            }
+            
+            renderDataTable();
+        }
+        
+        function renderHistoryTable(history) {
+            historyTableBody.innerHTML = '';
+            
+            history.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.date}</td>
+                    <td>${item.file}</td>
+                    <td>${item.user}</td>
+                    <td>${item.records}</td>
+                `;
+                historyTableBody.appendChild(row);
+            });
+        }
+        
+        function addToHistory(filename, recordCount) {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            
+            const historyItem = {
+                date: dateStr,
+                file: filename,
+                user: currentUser.role,
+                records: recordCount
+            };
+            
+            // Aquí normalmente se guardaría en una base de datos
+            sampleHistory.unshift(historyItem);
+            renderHistoryTable(sampleHistory);
+        }
+        
+        function initChart() {
+            const ctx = document.getElementById('equipos-chart').getContext('2d');
+            
+            // Destruir gráfica anterior si existe
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const chartTypeValue = chartType.value;
+            const dataField = chartDataSelect.value;
+            
+            // Preparar datos para la gráfica
+            const dataMap = {};
+            equiposData.forEach(item => {
+                const value = item[dataField] || 'Sin especificar';
+                dataMap[value] = (dataMap[value] || 0) + 1;
+            });
+            
+            const labels = Object.keys(dataMap);
+            const data = Object.values(dataMap);
+            
+            // Generar colores
+            const backgroundColors = [
+                'rgba(78, 115, 223, 0.7)',
+                'rgba(54, 185, 204, 0.7)',
+                'rgba(28, 200, 138, 0.7)',
+                'rgba(246, 194, 62, 0.7)',
+                'rgba(231, 74, 59, 0.7)',
+                'rgba(133, 135, 150, 0.7)',
+                'rgba(123, 97, 255, 0.7)',
+                'rgba(244, 114, 182, 0.7)'
+            ];
+            
+            const borderColors = backgroundColors.map(color => color.replace('0.7', '1'));
+            
+            chart = new Chart(ctx, {
+                type: chartTypeValue,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Equipos por ${dataField}`,
+                        data: data,
+                        backgroundColor: backgroundColors.slice(0, labels.length),
+                        borderColor: borderColors.slice(0, labels.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: chartTypeValue === 'pie' || chartTypeValue === 'doughnut' ? {} : {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Distribución de Equipos por ${dataField.charAt(0).toUpperCase() + dataField.slice(1)}`,
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            position: chartTypeValue === 'pie' || chartTypeValue === 'doughnut' ? 'right' : 'top'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateChart() {
+            initChart();
+        }
+        
+        function updateStats() {
+            totalEquipos.textContent = equiposData.length;
+            
+            const portatiles = equiposData.filter(item => item.tipo === 'Portátil').length;
+            totalPortatiles.textContent = portatiles;
+            
+            const principal = equiposData.filter(item => item.sede === 'Principal').length;
+            totalPrincipal.textContent = principal;
+            
+            const observaciones = equiposData.filter(item => item.observaciones && item.observaciones.trim() !== '').length;
+            totalObservaciones.textContent = observaciones;
+        }
+        
+        function clearAllData() {
+            if (confirm('¿Estás seguro de que quieres eliminar todos los datos de equipos? Esta acción no se puede deshacer.')) {
+                // Aquí normalmente se enviaría una solicitud al servidor
+                equiposData = [];
+                filteredData = [];
+                renderDataTable();
+                
+                // Limpiar gráfica
+                if (chart) {
+                    chart.destroy();
+                    chart = null;
+                }
+                
+                // Actualizar estadísticas
+                updateStats();
+                
+                showNotification('Todos los datos han sido eliminados.', 'info');
+            }
+        }
+        
+        function exportData() {
+            // Crear un blob con los datos
+            const dataStr = JSON.stringify(equiposData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            // Crear un enlace de descarga
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10);
+            link.download = `equipos_exportados_${dateStr}.json`;
+            link.click();
+            
+            showNotification('Datos exportados correctamente.', 'success');
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Crear elemento de notificación
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            // Icono según el tipo
+            let icon = 'fa-info-circle';
+            if (type === 'success') icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-circle';
+            if (type === 'warning') icon = 'fa-exclamation-triangle';
+            
+            notification.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${message}</span>
+            `;
+            
+            // Insertar en el DOM
+            const container = document.querySelector('.container');
+            container.insertBefore(notification, container.firstChild);
+            
+            // Eliminar después de 5 segundos
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        function switchTab(tabId) {
+            // Desactivar todas las pestañas
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                tab.setAttribute('aria-selected', 'false');
+            });
+            
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activar la pestaña seleccionada
+            const selectedTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
+            selectedTab.classList.add('active');
+            selectedTab.setAttribute('aria-selected', 'true');
+            
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        }
+        
+        function applyFilters() {
+            const typeValue = filterType.value.toLowerCase();
+            const sedeValue = filterSede.value.toLowerCase();
+            const docenteValue = filterDocente.value.toLowerCase();
+            const searchValue = searchInput.value.toLowerCase();
+            
+            filteredData = equiposData.filter(item => {
+                return (typeValue === '' || (item.tipo && item.tipo.toLowerCase().includes(typeValue))) &&
+                       (sedeValue === '' || (item.sede && item.sede.toLowerCase().includes(sedeValue))) &&
+                       (docenteValue === '' || (item.docente && item.docente.toLowerCase().includes(docenteValue))) &&
+                       (searchValue === '' || 
+                        (item.tipo && item.tipo.toLowerCase().includes(searchValue)) ||
+                        (item.marca && item.marca.toLowerCase().includes(searchValue)) ||
+                        (item.procesador && item.procesador.toLowerCase().includes(searchValue)) ||
+                        (item.serial_ot && item.serial_ot.toLowerCase().includes(searchValue)) ||
+                        (item.sede && item.sede.toLowerCase().includes(searchValue)) ||
+                        (item.docente && item.docente.toLowerCase().includes(searchValue)) ||
+                        (item.observaciones && item.observaciones.toLowerCase().includes(searchValue)));
+            });
+            
+            currentPage = 1; // Reiniciar a la primera página
+            renderDataTable();
+        }
+        
+        // Funciones para manipulación de equipos
+        function viewEquipment(id) {
+            const equipo = equiposData.find(item => item.id === id);
+            if (equipo) {
+                // Crear modal para ver detalles
+                const detailsModal = document.createElement('div');
+                detailsModal.className = 'modal active';
+                detailsModal.setAttribute('role', 'dialog');
+                detailsModal.setAttribute('aria-modal', 'true');
+                detailsModal.setAttribute('aria-labelledby', 'details-title');
+                
+                detailsModal.innerHTML = `
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="details-title"><i class="fas fa-laptop"></i> Detalles del Equipo</h3>
+                            <button class="modal-close" aria-label="Cerrar modal">&times;</button>
+                        </div>
+                        <div class="form-group">
+                            <p><strong>ID:</strong> ${equipo.id || ''}</p>
+                            <p><strong>Tipo:</strong> ${equipo.tipo || ''}</p>
+                            <p><strong>Marca:</strong> ${equipo.marca || ''}</p>
+                            <p><strong>Procesador:</strong> ${equipo.procesador || ''}</p>
+                            <p><strong>Serial OT:</strong> ${equipo.serial_ot || ''}</p>
+                            <p><strong>Fecha Ingreso:</strong> ${equipo.fecha_ingreso || ''}</p>
+                            <p><strong>Sede:</strong> ${equipo.sede || ''}</p>
+                            <p><strong>Docente:</strong> ${equipo.docente || ''}</p>
+                            <p><strong>Observaciones:</strong> ${equipo.observaciones || ''}</p>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn-secondary modal-close">Cerrar</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(detailsModal);
+                
+                // Configurar cierre
+                const closeBtn = detailsModal.querySelector('.modal-close');
+                closeBtn.addEventListener('click', () => {
+                    detailsModal.remove();
+                });
+                
+                detailsModal.addEventListener('click', (e) => {
+                    if (e.target === detailsModal) {
+                        detailsModal.remove();
+                    }
+                });
+            }
+        }
+        
+        function editEquipment(id) {
+            const equipo = equiposData.find(item => item.id === id);
+            if (equipo) {
+                editingEquipmentId = id;
+                modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Equipo';
+                
+                // Rellenar formulario
+                document.getElementById('eq-tipo').value = equipo.tipo || '';
+                document.getElementById('eq-marca').value = equipo.marca || '';
+                document.getElementById('eq-procesador').value = equipo.procesador || '';
+                document.getElementById('eq-serial').value = equipo.serial_ot || '';
+                document.getElementById('eq-fecha').value = equipo.fecha_ingreso || '';
+                document.getElementById('eq-sede').value = equipo.sede || '';
+                document.getElementById('eq-docente').value = equipo.docente || '';
+                document.getElementById('eq-observaciones').value = equipo.observaciones || '';
+                
+                equipmentModal.classList.add('active');
+            }
+        }
+        
+        function deleteEquipment(id) {
+            if (confirm('¿Estás seguro de que quieres eliminar este equipo?')) {
+                equiposData = equiposData.filter(item => item.id !== id);
+                applyFilters();
+                initChart();
+                updateStats();
+                showNotification('Equipo eliminado correctamente.', 'success');
+            }
+        }
+        
+        function showAddEquipmentModal() {
+            editingEquipmentId = null;
+            modalTitle.innerHTML = '<i class="fas fa-plus"></i> Añadir Equipo';
+            
+            // Limpiar formulario
+            equipmentForm.reset();
+            
+            equipmentModal.classList.add('active');
+        }
+        
+        function closeModal() {
+            equipmentModal.classList.remove('active');
+            equipmentForm.reset();
+            editingEquipmentId = null;
+        }
+        
+        function handleEquipmentSubmit(e) {
+            e.preventDefault();
+            
+            const equipmentData = {
+                tipo: document.getElementById('eq-tipo').value,
+                marca: document.getElementById('eq-marca').value,
+                procesador: document.getElementById('eq-procesador').value,
+                serial_ot: document.getElementById('eq-serial').value,
+                fecha_ingreso: document.getElementById('eq-fecha').value,
+                sede: document.getElementById('eq-sede').value,
+                docente: document.getElementById('eq-docente').value,
+                observaciones: document.getElementById('eq-observaciones').value
+            };
+            
+            if (editingEquipmentId) {
+                // Editar equipo existente
+                const index = equiposData.findIndex(item => item.id === editingEquipmentId);
+                if (index !== -1) {
+                    equiposData[index] = { ...equiposData[index], ...equipmentData };
+                    showNotification('Equipo actualizado correctamente.', 'success');
+                }
+            } else {
+                // Añadir nuevo equipo
+                const maxId = equiposData.length > 0 ? Math.max(...equiposData.map(eq => eq.id)) : 0;
+                const newEquipment = {
+                    id: maxId + 1,
+                    ...equipmentData
+                };
+                
+                equiposData.push(newEquipment);
+                showNotification('Equipo añadido correctamente.', 'success');
+            }
+            
+            applyFilters();
+            initChart();
+            updateStats();
+            closeModal();
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Cambiar icono
+            themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            
+            // Actualizar gráficas si existen
+            if (chart) {
+                initChart();
+            }
+        }
+    </script>
+</body>
+</html>
